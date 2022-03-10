@@ -14,6 +14,9 @@
         + [] Move a page before or after another page
     + PDF Page Deletion
         + [] Delete a page number
++ Distribute the project with chocolatey on windows
+    + Use dotnet publish to make a single EXE
+    + Create a powershell to submit to chocolatey via an api key
 
 ## Dependencies
 + Avalonia  (via nac.forms)

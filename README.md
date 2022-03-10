@@ -14,6 +14,9 @@
         + [] Move a page before or after another page
     + PDF Page Deletion
         + [] Delete a page number
+    + PDF File management
+        + [] Provide a save button
+        + All the PDF changes will happen to a copy of the pdf they load.  The temporary pdf file will be stored in some temporary folder that is managed.
 + Distribute the project with chocolatey on windows
     + Use dotnet publish to make a single EXE
     + Create a powershell to submit to chocolatey via an api key

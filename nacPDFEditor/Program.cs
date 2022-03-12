@@ -1,3 +1,10 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using repos = nacPDFEditor.repos;
 
-Console.WriteLine("Hello, World!");
+using nac.Forms;
+
+var form = Avalonia.AppBuilder.Configure<nac.Forms.App>()
+    .NewForm();
+    
+form.Title = "Nac PDF Editor";
+
+await repos.MainWindow.run(form);

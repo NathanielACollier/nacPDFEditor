@@ -5,7 +5,7 @@ using SixLabors.ImageSharp.Processing;
 
 namespace nacPDFEditor.repos;
 
-public class PDFDocImageReader
+public class PDFDocImageReader: IDisposable
 {
     /*
      see example here: https://stackoverflow.com/questions/12831742/convert-pdf-to-image-without-using-ghostscript-dll
@@ -47,5 +47,10 @@ public class PDFDocImageReader
                 return imgData;
             }
         }// end of page reader
+    }
+
+    public void Dispose()
+    {
+        this.docReader.Dispose();
     }
 }

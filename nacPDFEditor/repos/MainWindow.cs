@@ -24,19 +24,27 @@ public static class MainWindow
         .VerticalGroup(dependOnPDFVG =>
         {
             dependOnPDFVG.HorizontalGroup(hg =>
-            {
-                hg.Text("Page:")
-                    .TextBoxFor(nameof(model.currentPageNumber), convertFromUIToModel: (str) =>
-                    {
-                        if (int.TryParse(str, out int myNum))
+                {
+                    hg.Text("Page:", new Style {width = 50})
+                        .TextBoxFor(nameof(model.currentPageNumber), convertFromUIToModel: (str) =>
                         {
-                            return myNum;
-                        }
+                            if (int.TryParse(str, out int myNum))
+                            {
+                                return myNum;
+                            }
 
-                        return 0;
-                    })
-                    .Text($"of {pdfImageReader.PageCount}");
-            })
+                            return 0;
+                        }, style: new Style {width = 50})
+                        .TextFor(nameof(model.PageCountDisplayText), style:new Style{width = 50})
+                        .Button("Prev", (args) =>
+                        {
+
+                        }, style:new Style{width = 50})
+                        .Button("Next", (args) =>
+                        {
+
+                        }, style:new Style{width = 50});
+                }, style: new Style{height = 30})
             .Image(nameof(model.CurrentPageImage));
         }, style: new Style{isVisibleModelName = nameof(model.IsPDFReady)})
         .Display();
@@ -44,6 +52,10 @@ public static class MainWindow
 
     private static void OnPDFFilePathChange(string newFilePath)
     {
+        if (string.IsNullOrWhiteSpace(newFilePath))
+        {
+            return;
+        }
         model.IsPDFReady = false;
 
         __form.Title = $"nacPDFEditor (" + System.IO.Path.GetFileName(newFilePath) + ")";
@@ -51,6 +63,9 @@ public static class MainWindow
         pdfImageReader = new repos.PDFDocImageReader(pdfFilePath: newFilePath);
         // show first page
         model.CurrentPageImage = pdfImageReader.getPageAsImage(0);
+        model.PageCountDisplayText = $"of {pdfImageReader.PageCount-1}";
+
+        model.IsPDFReady = true;
     }
     
 }

@@ -28,4 +28,10 @@ public class MainWindow : nac.Forms.model.ViewModelBase
         get { return GetValue(() => CurrentPageImage); }
         set { SetValue(() => CurrentPageImage, value);}
     }
+
+    public string PageCountDisplayText
+    {
+        get { return GetValue(() => PageCountDisplayText); }
+        set { SetValue(() => PageCountDisplayText, value);}
+    }
 }

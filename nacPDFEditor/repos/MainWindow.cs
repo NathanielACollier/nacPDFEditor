@@ -46,24 +46,41 @@ public static class MainWindow
 
     private static void onclick_nextPDFPageButton(object obj)
     {
-        if (model.currentPageNumber > pdfImageReader.PageCount - 2)
+        try
         {
-            return;
+            if (model.currentPageNumber > pdfImageReader.PageCount - 2)
+            {
+                return;
+            }
+
+            model.currentPageNumber++;
+            model.CurrentPageImage = pdfImageReader.getPageAsImage(model.currentPageNumber);
+        }
+        catch (Exception ex)
+        {
+            repos.ErrorHandlerWindow.display(__form, ex, "Next Page Button Click")
+                .Wait();
         }
 
-        model.currentPageNumber++;
-        model.CurrentPageImage = pdfImageReader.getPageAsImage(model.currentPageNumber);
     }
 
     private static void onclick_prevPDFPageButton(object obj)
     {
-        if (model.currentPageNumber < 1)
+        try
         {
-            return;
-        }
+            if (model.currentPageNumber < 1)
+            {
+                return;
+            }
 
-        model.currentPageNumber--;
-        model.CurrentPageImage = pdfImageReader.getPageAsImage(model.currentPageNumber);
+            model.currentPageNumber--;
+            model.CurrentPageImage = pdfImageReader.getPageAsImage(model.currentPageNumber);
+        }
+        catch (Exception ex)
+        {
+            repos.ErrorHandlerWindow.display(__form, ex, "Previous Page button click")
+                .Wait();
+        }
     }
 
     private static void OnPDFFilePathChange(string newFilePath)
@@ -72,16 +89,44 @@ public static class MainWindow
         {
             return;
         }
-        model.IsPDFReady = false;
 
-        __form.Title = $"nacPDFEditor (" + System.IO.Path.GetFileName(newFilePath) + ")";
+        try
+        {
+            model.IsPDFReady = false;
 
-        pdfImageReader = new repos.PDFDocImageReader(pdfFilePath: newFilePath);
-        // show first page
-        model.CurrentPageImage = pdfImageReader.getPageAsImage(0);
-        model.PageCountDisplayText = $"of {pdfImageReader.PageCount-1}";
+            __form.Title = $"nacPDFEditor (" + System.IO.Path.GetFileName(newFilePath) + ")";
 
-        model.IsPDFReady = true;
+            Task.Run(() =>
+            {
+                var reader = new repos.PDFDocImageReader(pdfFilePath: newFilePath);
+                // show first page
+                var img = reader.getPageAsImage(0);
+
+                return (reader: reader,
+                    img: img);
+            }).ContinueWith(t =>
+            {
+                // back on UI thread
+                pdfImageReader = t.Result.reader;
+                __form.InvokeAsync(() =>
+                {
+                    model.CurrentPageImage = t.Result.img;
+                    model.PageCountDisplayText = $"of {pdfImageReader.PageCount - 1}";
+
+                    model.IsPDFReady = true;
+                    return Task.CompletedTask;
+                });
+
+            });
+        }
+        catch (Exception ex)
+        {
+            repos.ErrorHandlerWindow.display(__form, ex, $"Load new pdf {newFilePath}")
+                .Wait();
+        }
+
+
+
     }
     
 }

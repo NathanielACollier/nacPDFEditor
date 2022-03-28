@@ -35,13 +35,42 @@ public static class MainWindow
 
                             return 0;
                         }, style: new Style {width = 50})
-                        .TextFor(nameof(model.PageCountDisplayText), style:new Style{width = 50})
-                        .Button("Prev", onClick: onclick_prevPDFPageButton, style:new Style{width = 50})
-                        .Button("Next", onClick: onclick_nextPDFPageButton, style:new Style{width = 50});
+                        .TextFor(nameof(model.PageCountDisplayText), style: new Style {width = 50})
+                        .Button("Prev", onClick: onclick_prevPDFPageButton, style: new Style {width = 50})
+                        .Button("Next", onClick: onclick_nextPDFPageButton, style: new Style {width = 50})
+                        .Button("Rotate Left", onclick_rotateCurrentPageLeft, style: new Style {width = 50});
                 }, style: new Style{height = 30})
             .Image(nameof(model.CurrentPageImage));
         }, style: new Style{isVisibleModelName = nameof(model.IsPDFReady)})
         .Display();
+    }
+
+    private static void onclick_rotateCurrentPageLeft(object obj)
+    {
+        try
+        {
+            Task.Run(async () =>
+            {
+                repos.itextPDFManipulation.rotatePageLeft90(model.PDFFilePath, model.currentPageNumber);
+
+                await refreshCurrentPageImageDisplay();
+
+            }).ContinueWith(t =>
+            {
+                __form.InvokeAsync(async () =>
+                {
+                    // back on UI thread
+                });
+            });
+            
+            
+            
+        }
+        catch (Exception ex)
+        {
+            repos.ErrorHandlerWindow.display(__form, ex, "Rotate Page Left")
+                .Wait();
+        }
     }
 
     private static void onclick_nextPDFPageButton(object obj)
@@ -83,6 +112,24 @@ public static class MainWindow
         }
     }
 
+
+    private static async Task refreshCurrentPageImageDisplay()
+    {
+        var result = await Task.Run(() =>
+        {
+            var reader = new repos.PDFDocImageReader(pdfFilePath: model.PDFFilePath);
+            // show first page
+            var img = reader.getPageAsImage(0);
+
+            return (reader: reader,
+                img: img);
+        });
+        
+        model.CurrentPageImage = result.img;
+        model.PageCountDisplayText = $"of {pdfImageReader.PageCount - 1}";
+    }
+    
+    
     private static void OnPDFFilePathChange(string newFilePath)
     {
         if (string.IsNullOrWhiteSpace(newFilePath))
@@ -96,28 +143,11 @@ public static class MainWindow
 
             __form.Title = $"nacPDFEditor (" + System.IO.Path.GetFileName(newFilePath) + ")";
 
-            Task.Run(() =>
-            {
-                var reader = new repos.PDFDocImageReader(pdfFilePath: newFilePath);
-                // show first page
-                var img = reader.getPageAsImage(0);
-
-                return (reader: reader,
-                    img: img);
-            }).ContinueWith(t =>
-            {
-                // back on UI thread
-                pdfImageReader = t.Result.reader;
-                __form.InvokeAsync(() =>
+            refreshCurrentPageImageDisplay()
+                .ContinueWith(t =>
                 {
-                    model.CurrentPageImage = t.Result.img;
-                    model.PageCountDisplayText = $"of {pdfImageReader.PageCount - 1}";
-
                     model.IsPDFReady = true;
-                    return Task.CompletedTask;
                 });
-
-            });
         }
         catch (Exception ex)
         {

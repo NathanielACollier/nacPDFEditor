@@ -16,10 +16,18 @@ public static class MainWindow
         form.DataContext = model;
         __form = form;
 
+        model.PropertyChanged += (_s, _args) =>
+        {
+            if (string.Equals(_args.PropertyName, nameof(model.PDFFilePath)))
+            {
+                OnPDFFilePathChange();
+            }
+        };
+
         form.HorizontalGroup(hg =>
         {
             hg.Text("PDF File: ", style: new Style {width = 50})
-                .FilePathFor(nameof(model.PDFFilePath), onFilePathChanged: OnPDFFilePathChange);
+                .FilePathFor(nameof(model.PDFFilePath));
         })
         .VerticalGroup(dependOnPDFVG =>
         {
@@ -45,35 +53,25 @@ public static class MainWindow
         .Display();
     }
 
-    private static void onclick_rotateCurrentPageLeft(object obj)
+    private static async Task onclick_rotateCurrentPageLeft()
     {
         try
         {
-            Task.Run(async () =>
+            await Task.Run(async () =>
             {
                 repos.itextPDFManipulation.rotatePageLeft90(model.PDFFilePath, model.currentPageNumber);
 
-                await refreshCurrentPageImageDisplay();
+                await reloadPDFFileThenRefreshCurrentPageImageDisplay();
 
-            }).ContinueWith(t =>
-            {
-                __form.InvokeAsync(async () =>
-                {
-                    // back on UI thread
-                });
             });
-            
-            
-            
         }
         catch (Exception ex)
         {
-            repos.ErrorHandlerWindow.display(__form, ex, "Rotate Page Left")
-                .Wait();
+            await repos.ErrorHandlerWindow.display(__form, ex, "Rotate Page Left");
         }
     }
 
-    private static void onclick_nextPDFPageButton(object obj)
+    private static async Task onclick_nextPDFPageButton()
     {
         try
         {
@@ -83,7 +81,13 @@ public static class MainWindow
             }
 
             model.currentPageNumber++;
-            model.CurrentPageImage = pdfImageReader.getPageAsImage(model.currentPageNumber);
+            var pageImage = await Task.Run(() =>
+                {
+                    return pdfImageReader.getPageAsImage(model.currentPageNumber);
+                });
+                    
+            model.CurrentPageImage = pageImage;
+
         }
         catch (Exception ex)
         {
@@ -93,7 +97,7 @@ public static class MainWindow
 
     }
 
-    private static void onclick_prevPDFPageButton(object obj)
+    private static async Task onclick_prevPDFPageButton()
     {
         try
         {
@@ -103,7 +107,11 @@ public static class MainWindow
             }
 
             model.currentPageNumber--;
-            model.CurrentPageImage = pdfImageReader.getPageAsImage(model.currentPageNumber);
+            var pageImage = await Task.Run(() =>
+            {
+                return pdfImageReader.getPageAsImage(model.currentPageNumber);
+            });
+            model.CurrentPageImage = pageImage;
         }
         catch (Exception ex)
         {
@@ -113,7 +121,7 @@ public static class MainWindow
     }
 
 
-    private static async Task refreshCurrentPageImageDisplay()
+    private static async Task reloadPDFFileThenRefreshCurrentPageImageDisplay()
     {
         var result = await Task.Run(() =>
         {
@@ -130,9 +138,9 @@ public static class MainWindow
     }
     
     
-    private static void OnPDFFilePathChange(string newFilePath)
+    private static async Task OnPDFFilePathChange()
     {
-        if (string.IsNullOrWhiteSpace(newFilePath))
+        if (string.IsNullOrWhiteSpace(model.PDFFilePath))
         {
             return;
         }
@@ -141,17 +149,15 @@ public static class MainWindow
         {
             model.IsPDFReady = false;
 
-            __form.Title = $"nacPDFEditor (" + System.IO.Path.GetFileName(newFilePath) + ")";
+            __form.Title = $"nacPDFEditor (" + System.IO.Path.GetFileName(model.PDFFilePath) + ")";
 
-            refreshCurrentPageImageDisplay()
-                .ContinueWith(t =>
-                {
-                    model.IsPDFReady = true;
-                });
+            await reloadPDFFileThenRefreshCurrentPageImageDisplay();
+            
+            model.IsPDFReady = true;
         }
         catch (Exception ex)
         {
-            repos.ErrorHandlerWindow.display(__form, ex, $"Load new pdf {newFilePath}")
+            repos.ErrorHandlerWindow.display(__form, ex, $"Load new pdf {model.PDFFilePath}")
                 .Wait();
         }
 

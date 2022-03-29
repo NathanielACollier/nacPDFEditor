@@ -91,8 +91,7 @@ public static class MainWindow
         }
         catch (Exception ex)
         {
-            repos.ErrorHandlerWindow.display(__form, ex, "Next Page Button Click")
-                .Wait();
+            await repos.ErrorHandlerWindow.display(__form, ex, "Next Page Button Click");
         }
 
     }
@@ -115,8 +114,7 @@ public static class MainWindow
         }
         catch (Exception ex)
         {
-            repos.ErrorHandlerWindow.display(__form, ex, "Previous Page button click")
-                .Wait();
+            await repos.ErrorHandlerWindow.display(__form, ex, "Previous Page button click");
         }
     }
 
@@ -157,8 +155,7 @@ public static class MainWindow
         }
         catch (Exception ex)
         {
-            repos.ErrorHandlerWindow.display(__form, ex, $"Load new pdf {model.PDFFilePath}")
-                .Wait();
+            await repos.ErrorHandlerWindow.display(__form, ex, $"Load new pdf {model.PDFFilePath}");
         }
 
 

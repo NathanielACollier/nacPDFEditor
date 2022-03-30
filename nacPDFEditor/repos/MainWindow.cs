@@ -132,6 +132,7 @@ public static class MainWindow
         });
         
         model.CurrentPageImage = result.img;
+        pdfImageReader = result.reader;
         model.PageCountDisplayText = $"of {pdfImageReader.PageCount - 1}";
     }
     

@@ -1,4 +1,5 @@
 ﻿using repos = nacPDFEditor.repos;
+using log = nacPDFEditor.lib.log;
 
 using nac.Forms;
 
@@ -7,10 +8,11 @@ var form = Avalonia.AppBuilder.Configure<nac.Forms.App>()
 
 nac.Forms.lib.Log.OnNewMessage += (_s, _logEntry) =>
 {
-    string line = $"[{_logEntry.EventDate:hh_mm_tt}] - {_logEntry.Level} - {_logEntry.CallingMemberName} - {_logEntry.Message}";
-    System.Diagnostics.Debug.WriteLine(line);
+    log.write(_logEntry);
 };
     
 form.Title = "Nac PDF Editor";
+
+log.info("Application started");
 
 await repos.MainWindow.run(form);

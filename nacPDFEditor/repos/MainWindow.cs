@@ -1,4 +1,5 @@
-﻿using nac.Forms;
+﻿using iText.Kernel.Pdf;
+using nac.Forms;
 using nac.Forms.model;
 
 namespace nacPDFEditor.repos;
@@ -57,13 +58,18 @@ public static class MainWindow
     {
         try
         {
-            await Task.Run(async () =>
+            var pdfData = await Task.Run(async () =>
             {
-                repos.itextPDFManipulation.rotatePageLeft90(model.PDFFilePath, model.currentPageNumber);
+                using (var ms = new System.IO.FileStream(model.PDFFilePath, FileMode.Open, FileAccess.Read))
+                {
+                    var alteredPDFData = repos.itextPDFManipulation.rotatePageLeft90(pdfStream: ms, model.currentPageNumber);
 
-                await reloadPDFFileThenRefreshCurrentPageImageDisplay();
+                    return alteredPDFData;
+                }
 
             });
+            
+            await displayPdfDataAtPage(pdfData, model.currentPageNumber);
         }
         catch (Exception ex)
         {
@@ -123,7 +129,19 @@ public static class MainWindow
     {
         var result = await Task.Run(() =>
         {
-            var reader = new repos.PDFDocImageReader(pdfFilePath: model.PDFFilePath);
+            // read in the PDF bytes
+            var pdfFileData = System.IO.File.ReadAllBytes(model.PDFFilePath);
+            return pdfFileData;
+        });
+
+        await displayPdfDataAtPage(result, 0);
+    }
+
+    private static async Task displayPdfDataAtPage(byte[] pdfData, int pageNumber)
+    {
+        var result = await Task.Run(() =>
+        {
+            var reader = new repos.PDFDocImageReader(pdfData: pdfData);
             // show first page
             var img = reader.getPageAsImage(0);
 

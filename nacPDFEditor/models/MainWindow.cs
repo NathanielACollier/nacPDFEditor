@@ -9,7 +9,6 @@ public class MainWindow : nac.Forms.model.ViewModelBase
         set { SetValue(() => PDFFilePath, value);}
     }
 
-
     public bool IsPDFReady
     {
         get { return GetValue(() => IsPDFReady); }

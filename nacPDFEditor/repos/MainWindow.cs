@@ -59,9 +59,15 @@ public static class MainWindow
 
                         })
                         .TextFor(nameof(model.PageCountDisplayText), style: new Style {width = 50})
-                        .Button(_f=> _f.Image(nameof(model.ImagesLeftArrow)), onClick: onclick_prevPDFPageButton, style: new Style {width = 50})
-                        .Button(_f=> _f.Image(nameof(model.ImagesRightArrow)), onClick: onclick_nextPDFPageButton, style: new Style {width = 50})
-                        .Button(_f=> _f.Image(nameof(model.ImagesRotateLeft)), onclick_rotateCurrentPageLeft, style: new Style {width = 50});
+                        .Button(_f=> _f.Image(nameof(model.ImagesLeftArrow)), onClick: onclick_prevPDFPageButton,
+                                    style: new Style {width = 50,
+                                    TooltipText="Previous Page"})
+                        .Button(_f=> _f.Image(nameof(model.ImagesRightArrow)), onClick: onclick_nextPDFPageButton,
+                                    style: new Style {width = 50,
+                                    TooltipText="Next Page"})
+                        .Button(_f=> _f.Image(nameof(model.ImagesRotateLeft)), onclick_rotateCurrentPageLeft,
+                                    style: new Style {width = 50,
+                                    TooltipText="Rotate Current Page Left"});
                 }, style: new Style{height = 30})
             .Image(nameof(model.CurrentPageImage));
         }, style: new Style{isVisibleModelName = nameof(model.IsPDFReady)})

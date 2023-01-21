@@ -15,10 +15,10 @@ public class PDFDocImageReader: IDisposable
     private Docnet.Core.Readers.IDocReader docReader;
     public int PageCount { get; }
 
-    public PDFDocImageReader(string pdfFilePath)
+    public PDFDocImageReader(byte[] pdfData)
     {
         // load up a pdf from a filepath
-        this.docReader = Docnet.Core.DocLib.Instance.GetDocReader(pdfFilePath, new PageDimensions(1080, 1920));
+        this.docReader = Docnet.Core.DocLib.Instance.GetDocReader(pdfData, new PageDimensions(1080, 1920));
 
         this.PageCount = this.docReader.GetPageCount();
     }

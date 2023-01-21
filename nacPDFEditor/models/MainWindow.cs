@@ -9,7 +9,6 @@ public class MainWindow : nac.Forms.model.ViewModelBase
         set { SetValue(() => PDFFilePath, value);}
     }
 
-
     public bool IsPDFReady
     {
         get { return GetValue(() => IsPDFReady); }
@@ -33,5 +32,18 @@ public class MainWindow : nac.Forms.model.ViewModelBase
     {
         get { return GetValue(() => PageCountDisplayText); }
         set { SetValue(() => PageCountDisplayText, value);}
+    }
+
+    public byte[] ImagesLeftArrow { get; private set; }
+    public byte[] ImagesRightArrow { get; private set; }
+    public byte[] ImagesRotateLeft { get; private set; }
+    public byte[] ImagesRotateRight { get; private set; }
+
+    public MainWindow()
+    {
+        this.ImagesLeftArrow = lib.resources.GetImage("nacPDFEditor.resources.leftArrow.png");
+        this.ImagesRightArrow = lib.resources.GetImage("nacPDFEditor.resources.rightArrow.png");
+        this.ImagesRotateLeft = lib.resources.GetImage("nacPDFEditor.resources.rotateLeft.png");
+        this.ImagesRotateRight = lib.resources.GetImage("nacPDFEditor.resources.rotateRight.png");
     }
 }

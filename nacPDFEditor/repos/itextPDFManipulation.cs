@@ -4,22 +4,27 @@ namespace nacPDFEditor.repos;
 
 public static class itextPDFManipulation
 {
-    public static void rotatePageLeft90(string pdfFilePath, int pageNumber)
+    public static byte[] rotatePageLeft90(System.IO.Stream pdfStream, int pageNumber)
     {
-        using (var pdfReader = new iText.Kernel.Pdf.PdfReader(filename: pdfFilePath))
+        using (var pdfReader = new iText.Kernel.Pdf.PdfReader(pdfStream))
         {
-            var doc = new iText.Kernel.Pdf.PdfDocument(pdfReader, writer: new PdfWriter(filename: pdfFilePath));
-
-            if (pageNumber > doc.GetNumberOfPages())
+            using (var outStr = new System.IO.MemoryStream())
             {
-                throw new Exception($"Page [number={pageNumber}] is more than number of pages in document");
+                var doc = new iText.Kernel.Pdf.PdfDocument(pdfReader, writer: new PdfWriter(outStr));
+
+                if (pageNumber > doc.GetNumberOfPages())
+                {
+                    throw new Exception($"Page [number={pageNumber}] is more than number of pages in document");
+                }
+
+                var page = doc.GetPage(pageNum: pageNumber);
+
+                page.SetRotation(90);
+            
+                doc.Close();
+                return outStr.ToArray();
             }
 
-            var page = doc.GetPage(pageNum: pageNumber);
-
-            page.SetRotation(90);
-            
-            doc.Close();
         }
 
     }

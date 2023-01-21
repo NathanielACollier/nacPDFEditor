@@ -43,7 +43,21 @@ public static class MainWindow
                             }
 
                             return 0;
-                        }, style: new Style {width = 50})
+                        }, style: new Style {width = 50},
+                        onKeyPress: async (_keyArgs)=>
+                        {
+                            try
+                            {
+                                if (_keyArgs.Key == Avalonia.Input.Key.Enter)
+                                {
+                                    await refreshCurrentPage(); // page number changes by them entering in textbox, so just refresh
+                                }
+                            }catch(Exception ex)
+                            {
+                                repos.ErrorHandlerWindow.display(__form, ex, "Page Number Textbox Enter Press");
+                            }
+
+                        })
                         .TextFor(nameof(model.PageCountDisplayText), style: new Style {width = 50})
                         .Button(_f=> _f.Image(nameof(model.ImagesLeftArrow)), onClick: onclick_prevPDFPageButton, style: new Style {width = 50})
                         .Button(_f=> _f.Image(nameof(model.ImagesRightArrow)), onClick: onclick_nextPDFPageButton, style: new Style {width = 50})
@@ -62,7 +76,9 @@ public static class MainWindow
             {
                 using (var ms = new System.IO.FileStream(model.PDFFilePath, FileMode.Open, FileAccess.Read))
                 {
-                    var alteredPDFData = repos.itextPDFManipulation.rotatePageLeft90(pdfStream: ms, model.currentPageNumber);
+                    // itext thinks of pages as 1 thorugh end
+                    // where some of the other stuff thinks of it as starting with 0
+                    var alteredPDFData = repos.itextPDFManipulation.rotatePageLeft90(pdfStream: ms, model.currentPageNumber + 1);
 
                     return alteredPDFData;
                 }
@@ -87,12 +103,7 @@ public static class MainWindow
             }
 
             model.currentPageNumber++;
-            var pageImage = await Task.Run(() =>
-                {
-                    return pdfImageReader.getPageAsImage(model.currentPageNumber);
-                });
-                    
-            model.CurrentPageImage = pageImage;
+            await refreshCurrentPage();
 
         }
         catch (Exception ex)
@@ -112,11 +123,7 @@ public static class MainWindow
             }
 
             model.currentPageNumber--;
-            var pageImage = await Task.Run(() =>
-            {
-                return pdfImageReader.getPageAsImage(model.currentPageNumber);
-            });
-            model.CurrentPageImage = pageImage;
+            await refreshCurrentPage();
         }
         catch (Exception ex)
         {
@@ -124,6 +131,15 @@ public static class MainWindow
         }
     }
 
+
+    private static async Task refreshCurrentPage()
+    {
+        var pageImage = await Task.Run(() =>
+        {
+            return pdfImageReader.getPageAsImage(model.currentPageNumber);
+        });
+        model.CurrentPageImage = pageImage;
+    }
 
     private static async Task reloadPDFFileThenRefreshCurrentPageImageDisplay()
     {
@@ -142,8 +158,8 @@ public static class MainWindow
         var result = await Task.Run(() =>
         {
             var reader = new repos.PDFDocImageReader(pdfData: pdfData);
-            // show first page
-            var img = reader.getPageAsImage(0);
+
+            var img = reader.getPageAsImage(pageNumber);
 
             return (reader: reader,
                 img: img);

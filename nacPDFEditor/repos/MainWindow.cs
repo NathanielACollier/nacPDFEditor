@@ -9,6 +9,7 @@ public static class MainWindow
     private static nac.Forms.Form __form; // mainly use this to set Title
     private static models.MainWindow model;
     private static repos.PDFDocImageReader pdfImageReader;
+    private static byte[] currentPDFData;
     
     public static async Task run(Form form)
     {
@@ -80,7 +81,7 @@ public static class MainWindow
         {
             var pdfData = await Task.Run(async () =>
             {
-                using (var ms = new System.IO.FileStream(model.PDFFilePath, FileMode.Open, FileAccess.Read))
+                using (var ms = new System.IO.MemoryStream(currentPDFData))
                 {
                     // itext thinks of pages as 1 thorugh end
                     // where some of the other stuff thinks of it as starting with 0
@@ -173,6 +174,7 @@ public static class MainWindow
         
         model.CurrentPageImage = result.img;
         pdfImageReader = result.reader;
+        currentPDFData = pdfData; // save this for manipulation
         model.PageCountDisplayText = $"of {pdfImageReader.PageCount - 1}";
     }
     

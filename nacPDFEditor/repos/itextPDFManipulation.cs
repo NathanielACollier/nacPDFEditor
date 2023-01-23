@@ -19,7 +19,7 @@ public static class itextPDFManipulation
 
                 var page = doc.GetPage(pageNum: pageNumber);
 
-                page.SetRotation(90);
+                rotatePageDegrees(page, 90);
             
                 doc.Close();
                 return outStr.ToArray();
@@ -28,12 +28,18 @@ public static class itextPDFManipulation
         }
 
     }
-    
-    
-    
-    
-    
-    
-    
-    
+
+    private static void rotatePageDegrees(PdfPage page, int degrees)
+    {
+        int currentRotation = page.GetRotation();
+
+        int newRotation = currentRotation + degrees;
+
+        if(newRotation > 360)
+        {
+            newRotation = 360 - newRotation;
+        }
+
+        page.SetRotation(newRotation);
+    }
 }

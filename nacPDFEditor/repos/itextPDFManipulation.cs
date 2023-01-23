@@ -29,6 +29,39 @@ public static class itextPDFManipulation
     }
 
 
+    public static byte[] rotatePageRight90(System.IO.Stream pdfStream, int pageNumber)
+    {
+        return manipulatePDFDocument(pdfStream, (reader, outStr, doc) =>
+        {
+            if (pageNumber > doc.GetNumberOfPages())
+            {
+                throw new Exception($"Page [number={pageNumber}] is more than number of pages in document");
+            }
+
+            var page = doc.GetPage(pageNum: pageNumber);
+
+            rotatePageDegreesTowardRight(page, 90);
+        });
+    }
+
+
+
+    private static void rotatePageDegreesTowardRight(PdfPage page, int degrees)
+    {
+        int currentRotation = page.GetRotation();
+
+        int newRotation = currentRotation + degrees;
+
+        if(newRotation > 360)
+        {
+            newRotation = 360 - newRotation;
+        }
+
+        page.SetRotation(newRotation);
+    }
+
+
+
     public static byte[] rotatePageLeft90(System.IO.Stream pdfStream, int pageNumber)
     {
         return manipulatePDFDocument(pdfStream, (reader, outStr, doc) =>
@@ -45,16 +78,15 @@ public static class itextPDFManipulation
     }
 
 
-
     private static void rotatePageDegreesTowardLeft(PdfPage page, int degrees)
     {
         int currentRotation = page.GetRotation();
 
-        int newRotation = currentRotation + degrees;
+        int newRotation = currentRotation - degrees;
 
-        if(newRotation > 360)
+        if (newRotation < -360)
         {
-            newRotation = 360 - newRotation;
+            newRotation = -360 + newRotation;
         }
 
         page.SetRotation(newRotation);

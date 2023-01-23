@@ -9,6 +9,7 @@ public static class MainWindow
     private static nac.Forms.Form __form; // mainly use this to set Title
     private static models.MainWindow model;
     private static repos.PDFDocImageReader pdfImageReader;
+    private static byte[] currentPDFData;
     
     public static async Task run(Form form)
     {
@@ -34,7 +35,7 @@ public static class MainWindow
         {
             dependOnPDFVG.HorizontalGroup(hg =>
                 {
-                    hg.Text("Page:", new Style {width = 50})
+                    hg.Text("Page:", new Style { width = 50 })
                         .TextBoxFor(nameof(model.currentPageNumber), convertFromUIToModel: (str) =>
                         {
                             if (int.TryParse(str, out int myNum))
@@ -43,8 +44,8 @@ public static class MainWindow
                             }
 
                             return 0;
-                        }, style: new Style {width = 50},
-                        onKeyPress: async (_keyArgs)=>
+                        }, style: new Style { width = 50 },
+                        onKeyPress: async (_keyArgs) =>
                         {
                             try
                             {
@@ -52,26 +53,67 @@ public static class MainWindow
                                 {
                                     await refreshCurrentPage(); // page number changes by them entering in textbox, so just refresh
                                 }
-                            }catch(Exception ex)
+                            }
+                            catch (Exception ex)
                             {
                                 repos.ErrorHandlerWindow.display(__form, ex, "Page Number Textbox Enter Press");
                             }
 
                         })
-                        .TextFor(nameof(model.PageCountDisplayText), style: new Style {width = 50})
-                        .Button(_f=> _f.Image(nameof(model.ImagesLeftArrow)), onClick: onclick_prevPDFPageButton,
-                                    style: new Style {width = 50,
-                                    TooltipText="Previous Page"})
-                        .Button(_f=> _f.Image(nameof(model.ImagesRightArrow)), onClick: onclick_nextPDFPageButton,
-                                    style: new Style {width = 50,
-                                    TooltipText="Next Page"})
-                        .Button(_f=> _f.Image(nameof(model.ImagesRotateLeft)), onclick_rotateCurrentPageLeft,
-                                    style: new Style {width = 50,
-                                    TooltipText="Rotate Current Page Left"});
+                        .TextFor(nameof(model.PageCountDisplayText), style: new Style { width = 50 })
+                        .Button(_f => _f.Image(nameof(model.ImagesLeftArrow)), onClick: onclick_prevPDFPageButton,
+                                    style: new Style
+                                    {
+                                        width = 50,
+                                        TooltipText = "Previous Page"
+                                    })
+                        .Button(_f => _f.Image(nameof(model.ImagesRightArrow)), onClick: onclick_nextPDFPageButton,
+                                    style: new Style
+                                    {
+                                        width = 50,
+                                        TooltipText = "Next Page"
+                                    })
+                        .Button(_f => _f.Image(nameof(model.ImagesRotateLeft)), onclick_rotateCurrentPageLeft,
+                                    style: new Style
+                                    {
+                                        width = 50,
+                                        TooltipText = "Rotate Current Page Left"
+                                    })
+                        .Button(_f => _f.Image(nameof(model.ImagesRotateRight)), onclick_rotateCurrentPageRight,
+                            style: new Style
+                            {
+                                width = 50,
+                                TooltipText = "Rotate Current Page Right"
+                            });
                 }, style: new Style{height = 30})
             .Image(nameof(model.CurrentPageImage));
         }, style: new Style{isVisibleModelName = nameof(model.IsPDFReady)})
         .Display();
+    }
+
+    private static async Task onclick_rotateCurrentPageRight()
+    {
+        try
+        {
+            var pdfData = await Task.Run(async () =>
+            {
+                using (var ms = new System.IO.MemoryStream(currentPDFData))
+                {
+                    // itext thinks of pages as 1 thorugh end
+                    // where some of the other stuff thinks of it as starting with 0
+                    var alteredPDFData = repos.itextPDFManipulation.rotatePageRight90(pdfStream: ms, model.currentPageNumber + 1);
+
+                    return alteredPDFData;
+                }
+
+            });
+
+            await displayPdfDataAtPage(pdfData, model.currentPageNumber);
+        }
+        catch (Exception ex)
+        {
+            await repos.ErrorHandlerWindow.display(__form, ex, "Rotate Page Left");
+        }
     }
 
     private static async Task onclick_rotateCurrentPageLeft()
@@ -80,7 +122,7 @@ public static class MainWindow
         {
             var pdfData = await Task.Run(async () =>
             {
-                using (var ms = new System.IO.FileStream(model.PDFFilePath, FileMode.Open, FileAccess.Read))
+                using (var ms = new System.IO.MemoryStream(currentPDFData))
                 {
                     // itext thinks of pages as 1 thorugh end
                     // where some of the other stuff thinks of it as starting with 0
@@ -173,6 +215,7 @@ public static class MainWindow
         
         model.CurrentPageImage = result.img;
         pdfImageReader = result.reader;
+        currentPDFData = pdfData; // save this for manipulation
         model.PageCountDisplayText = $"of {pdfImageReader.PageCount - 1}";
     }
     

@@ -3,8 +3,7 @@ using log = nacPDFEditor.lib.log;
 
 using nac.Forms;
 
-var form = Avalonia.AppBuilder.Configure<nac.Forms.App>()
-    .NewForm();
+var form = nac.Forms.Form.NewForm();
 
 nac.Forms.lib.Log.OnNewMessage += (_s, _logEntry) =>
 {

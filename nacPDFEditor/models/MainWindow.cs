@@ -1,6 +1,6 @@
 ﻿namespace nacPDFEditor.models;
 
-public class MainWindow : nac.Forms.model.ViewModelBase
+public class MainWindow : nac.ViewModelBase.ViewModelBase
 {
 
     public string PDFFilePath

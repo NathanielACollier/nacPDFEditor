@@ -1,17 +1,15 @@
 ﻿using repos = nacPDFEditor.repos;
-using log = nacPDFEditor.lib.log;
 
-using nac.Forms;
+
+var log = new nac.Logging.Logger();
+nac.Logging.Appenders.ColoredConsole.Setup();
 
 var form = nac.Forms.Form.NewForm();
 
-nac.Forms.lib.Log.OnNewMessage += (_s, _logEntry) =>
-{
-    log.write(_logEntry);
-};
+
     
 form.Title = "Nac PDF Editor";
 
-log.info("Application started");
+log.Info("Application started");
 
 await repos.MainWindow.run(form);

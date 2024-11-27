@@ -8,7 +8,7 @@ public static class MainWindow
 {
     private static nac.Forms.Form __form; // mainly use this to set Title
     private static models.MainWindow model;
-    private static repos.PDFDocImageReader pdfImageReader;
+    private static nac.PDFUtilityLib.repositories.PDFDocImageReader pdfImageReader;
     private static byte[] currentPDFData;
     
     public static async Task run(Form form)
@@ -205,7 +205,7 @@ public static class MainWindow
     {
         var result = await Task.Run(() =>
         {
-            var reader = new repos.PDFDocImageReader(pdfData: pdfData);
+            var reader = new nac.PDFUtilityLib.repositories.PDFDocImageReader(pdfData: pdfData);
 
             var img = reader.getPageAsImage(pageNumber);
 

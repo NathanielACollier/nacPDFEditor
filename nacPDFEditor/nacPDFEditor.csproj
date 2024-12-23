@@ -9,7 +9,7 @@
 
     <ItemGroup>
       <PackageReference Include="itext7" Version="7.2.5" />
-      <PackageReference Include="nac.Forms" Version="2.3.11" />
+      <PackageReference Include="nac.Forms" Version="2.3.12" />
       <PackageReference Include="nac.PDFUtilityLib" Version="1.0.1" />
       <PackageReference Include="nac.ViewModelBase" Version="1.0.1" />
     </ItemGroup>
